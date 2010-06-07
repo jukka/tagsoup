@@ -91,16 +91,7 @@ public class HTMLScanner implements Scanner, Locator {
 
 	public void scan(Reader r0, ScanHandler h) throws IOException, SAXException {
 		theState = S_PCDATA;
-		PushbackReader r;
-		if (r0 instanceof PushbackReader) {
-			r = (PushbackReader)r0;
-			}
-		else if (r0 instanceof BufferedReader) {
-			r = new PushbackReader(r0);
-			}
-		else {
-			r = new PushbackReader(new BufferedReader(r0));
-			}
+		PushbackReader r = new PushbackReader(new BufferedReader(r0), 2);
 
 		int firstChar = r.read();	// Remove any leading BOM
 		if (firstChar != '\uFEFF') unread(r, firstChar);
