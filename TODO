@@ -1,0 +1,14 @@
+Notice: It's quite possible that none of these features will ever be
+implemented.  If you'd like to implement one yourself, feel free to send
+me a patch.
+
+Flag added parent elements with a special attribute
+Allow case sensitivity as a standard feature
+Don't see </script> tag when in pseudo-comment in script element
+Don't just chuck out namespace declarations
+Allow inline cruft in table bodies and rows
+	(Don't break up tables, ever?)
+	(Don't break up forms, ever, either?)
+Suppress start-tags for restartable elements if the element
+	is already on the stack (<b><b> is the same as <b>)
+Combine consecutive body elements

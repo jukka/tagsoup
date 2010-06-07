@@ -1,0 +1,407 @@
+<!--
+// This file is part of TagSoup and is Copyright 2002-2008 by John Cowan.
+//
+// This file is part of TagSoup and is Copyright 2002-2008 by John Cowan.
+//
+// TagSoup is licensed under the Apache License,
+// Version 2.0.  You may obtain a copy of this license at
+// http://www.apache.org/licenses/LICENSE-2.0 .  You may also have
+// additional legal rights not granted by this license.
+//
+// TagSoup is distributed in the hope that it will be useful, but
+// unless required by applicable law or agreed to in writing, TagSoup
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+// OF ANY KIND, either express or implied; not even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-->
+
+<html><head><title>TagSoup home page</title></head><body>
+<h1>TagSoup - Just Keep On Truckin'</h1>
+
+<h3>Introduction</h3>
+<p>This is the home page of TagSoup, a SAX-compliant parser written in Java
+that, instead of parsing well-formed or valid XML, parses HTML as it is
+found in the wild:
+<a href="http://oregonstate.edu/instruct/phl302/texts/hobbes/leviathan-c.html">
+poor, nasty and brutish</a>, though quite often far from short.
+TagSoup is designed for people who have to process this stuff using some
+semblance of a rational application design.  By providing a SAX interface,
+it allows standard XML tools to be applied to even the worst HTML.
+TagSoup also includes a command-line processor that reads HTML files
+and can generate either clean HTML or well-formed XML that is a
+close approximation to XHTML.</p>
+
+<p>This is also the README file packaged with TagSoup.</p>
+
+<p>TagSoup is free and Open Source software.  As of version 1.2, it
+is licensed under the
+<a href="http://opensource.org/licenses/apache2.0.php">
+Apache License, Version 2.0</a>, which allows proprietary re-use as well
+as use with GPL 3.0 or GPL 2.0-or-later projects.  (If anyone needs a
+GPL 2.0 license for a GPL 2.0-only project, feel free to ask.)
+
+<h3><i>Warning:</i> TagSoup will not build on stock Java 5.x or 6.x!</h3>
+
+<p>Due to a bug in the versions of Xalan shipped with Java 5.x and
+6.x, TagSoup will not build out of the box.  You need to retrieve
+<a href="http://prdownloads.sourceforge.net/saxon/saxon6-5-5.zip">
+Saxon 6.5.5</a>, which does not have the bug.  Unpack the
+zipfile in an empty directory and copy the <tt>saxon.jar</tt> and
+<tt>saxon-xml-apis.jar</tt> files to <tt>$ANT_HOME/lib</tt>.  The Ant
+build process for TagSoup will then notice that Saxon is available and
+use it instead.</p>
+
+<h3>TagSoup 1.2 released</h3>
+
+<p>There are a great many changes, most of them fixes for long-standing
+bugs, in this release.  Only the most important are listed here; for
+the rest, see the CHANGES file in the source distribution.  Very special
+thanks to Jojo Dijamco, whose intensive efforts at debugging made this
+release a usable upgrade rather than a useless mass of undetected bugs.</p>
+
+<ul>
+
+<li><p>As noted above, I have changed the license to Apache 2.0.</p></li>
+
+<li><p>The default content model for bogons (unknown elements) is now
+ANY rather than EMPTY.  <b>This is a breaking change</b>, which I have
+done only because there was so much demand for it.  It can be undone
+on the command line with the <code>--emptybogons</code> switch, or
+programmatically with <code>parser.setFeature(Parser.emptyBogonsFeature,
+true)</code>.</p></li>
+
+<li><p>The processing of entity references in attribute values has
+finally been fixed to do what browsers do.  That is, a reference
+is only recognized if it is properly terminated by a semicolon;
+otherwise it is treated as plain text.  This means that URIs
+like <code>foo?cdown=32&amp;cup=42</code> are no longer seen as
+containing an instance of the &cup; character (whose name happens to
+be <code>cup</code>).</p></li>
+
+<li><p>Several new switches have been added:
+
+<ul>
+
+<li><p><code>--doctype-system</code> and <code>--doctype-public</code>
+force a <code>DOCTYPE</code> declaration to be output and allow setting
+the system and public identifiers.</p></li>
+
+<li><p><code>--standalone</code> and <code>--version</code> allow control
+of the XML declaration that is output.  (Note that TagSoup's XML output
+is always version 1.0, even if you use <code>--version=1.1</code>.)</p></li>
+
+<li><p><code>--norootbogons</code> causes unknown elements not to be allowed
+as the document root element.  Instead, they are made children of the
+default root element (the <code>html</code> element for HTML).</p></li>
+
+</ul>
+<li><p>The TagSoup core now supports character entities with values
+above U+FFFF.  As a consequence, the HTML schema now supports all
+2,210 standard character entities from the 
+<a href="http://www.w3.org/TR/2007/WD-xml-entity-names-20071214">
+2007-12-14 draft of XML Entity Definitions for Characters</a>, except the
+94 which require more than one Unicode character to represent.</p></li>
+
+<li>The SAX events <code>startPrefixMapping</code> and
+<code>endPrefixMapping</code> are now being reported for all cases of
+foreign elements and attributes.</li>
+
+<li><p>All bugs around newline processing on Windows should now be gone.</p></li>
+
+<li>A number of content models have been loosened to allow elements
+to appear in new and non-standard (but commonly found) places.
+In particular, tables are now allowed inside paragraphs, against the
+letter of the W3C specification.</p>
+
+<li><p>Since the <code>span</code> element is intended for fine
+control of appearance using CSS, it should never have been a
+restartable element.  This very long-standing bug has now been
+fixed.</p></li>
+
+<li><p>The following non-standard elements are now at least partly
+supported: <code>bgsound</code>, <code>blink</code>, <code>canvas</code>,
+<code>comment</code>, <code>listing</code>, <code>marquee</code>,
+<code>nobr</code>, <code>rbc</code>, <code>rb</code>, <code>rp</code>,
+<code>rtc</code>, <code>rt</code>, <code>ruby</code>, <code>wbr</code>,
+<code>xmp</code>.</p></li>
+
+<li><p>In HTML output mode, boolean attributes like <code>checked</code>
+are now output as such, rather than in XML style as
+<code>checked="checked"</code>.</p></li>
+
+<li><p>Runs of &lt; characters such as &lt;&lt; and &lt;&lt;&lt; are now
+handled correctly in text rather than being transformed into extremely
+bogus start-tags.</p></li>
+
+</ul>
+
+<p><a href="tagsoup-1.2.jar">Download</a> the TagSoup 1.2 jar
+file here.
+It's about 87K long.<br/>
+<a href="tagsoup-1.2-src.zip">Download</a> the full TagSoup 1.2 source
+here.  If you don't have zip, you can use jar to unpack it.  <br/>
+<a href="CHANGES">Download</a> the current CHANGES file here.</p>
+
+<h3>TagSoup 1.1 released</h3>
+
+<p>TagSoup 1.1 adds Tatu Saloranta's JAXP support for TagSoup.
+To use TagSoup within the JAXP framework (which is not
+something I necessarily recommend, but it is part of the Java
+XML platform), you can create a <tt>SAXParser</tt> by calling
+<tt>org.ccil.cowan.tagsoup.jaxp.SAXParserImpl.newInstance()</tt>.  You can
+also set the system property <tt>javax.xml.parsers.SAXParserFactory</tt>
+to <tt>org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl</tt>, but <i>be
+aware</i> that doing this will cause all JAXP-based XML parsing to go
+through TagSoup, which is a Bad Thing if your application also reads
+XML documents.</p>
+
+<h3>What TagSoup does</h3>
+<p>TagSoup is designed as a parser, not a whole application; it isn't
+intended to permanently clean up bad HTML, as 
+<a href="http://tidy.sf.net">HTML Tidy</a> does, only to
+parse it on the fly.  Therefore, it does not convert presentation HTML
+to CSS or anything similar.  It does guarantee well-structured results:
+tags will wind up properly nested, default attributes will appear
+appropriately, and so on.</p>
+
+<p>The semantics of TagSoup are as far as practical those of actual HTML
+browsers.  In particular, never, never will it throw any sort of syntax
+error: the TagSoup motto is
+<a href="http://www.crumbmuseum.com/truckin.html">
+"Just Keep On Truckin'"</a>.  But there's much,
+much more.  For example, if the first tag is LI, it will supply the
+application with enclosing HTML, BODY, and UL tags.  Why UL?  Because
+that's what browsers assume in this situation.  For the same reason,
+overlapping tags are correctly restarted whenever possible: text like:</p>
+
+<pre>This is &lt;B>bold, &lt;I>bold italic, &lt;/b>italic, &lt;/i>normal text
+</pre>
+
+<p>gets correctly rewritten as:</p>
+
+<pre>This is &lt;b>bold, &lt;i>bold italic, &lt;/i>&lt;/b>&lt;i>italic, &lt;/i>normal text.
+</pre>
+
+<p>By intention, TagSoup is small and fast.  It does not
+depend on the existence of any framework other than SAX, and should be
+able to work with any framework that can accept SAX parsers.
+In particular, <a href="http://www.cafeconleche.org/XOM">XOM</a> 
+is known to work.
+
+<p>You can replace the low-level HTML scanner with one based on Sean McGrath's
+<a href="http://gnosis.cx/publish/programming/xml_matters_17.html">PYX</a>
+format (very close to James Clark's ESIS format).  You can also supply
+an AutoDetector that peeks at the incoming byte stream and guesses a
+character encoding for it.  Otherwise, the platform default is used. 
+If you need an autodetector of character sets, consider trying to
+adapt the <a href="http://jchardet.sourceforge.net/">Mozilla one</a>;
+if you succeed, let me know.</p>
+
+<h3>Note: TagSoup in Java 1.1</h3>
+
+<p>If you go through the TagSoup source and replace all references to
+<code>HashMap</code> with <code>Hashtable</code> and recompile,
+TagSoup will work fine in Java 1.1 VMs.  Thanks to Thorbj&oslash;rn
+Vinne for this discovery.<p>
+
+<h3>The TSaxon XSLT-for-HTML processor</h3>
+<p><a href="http://www.ccil.org/~cowan">I</a> am also distributing
+<a href="tsaxon">TSaxon</a>, a repackaging of version 6.5.5 of Michael
+Kay's Saxon XSLT version 1.0 implementation that includes TagSoup.
+TSaxon is a drop-in replacement for Saxon, and can be used to process
+either HTML or XML documents with XSLT stylesheets.
+
+
+<h3>TagSoup as a stand-alone program</h3>
+<p>It is possible to run TagSoup as a program by saying <code>java
+-jar tagsoup-1.0.1 [<i>option ...</i>] [<i>file ...</i>]</code>.
+Files mentioned on the command line will be parsed individually.  If no
+files are specified, the standard input is read.</p>
+
+<p>The following options are understood:</p>
+
+<dl>
+<dt><code>--files</code></dt>
+<dd>Output into individual files, with <code>html</code> extensions changed
+to <code>xhtml</code>.  Otherwise, all output is sent to the standard output.</dd>
+
+<dt><code>--html</code></dt>
+<dd>Output is in clean HTML: the XML declaration is suppressed, as are end-tags
+for the known empty elements.</dd>
+
+<dt><code>--omit-xml-declaration</code></dt>
+<dd>The XML declaration is suppressed.</dd>
+
+<dt><code>--method=html</code></dt>
+<dd>End-tags for the known empty HTML elements are suppressed.</dd>
+
+<dt><code>--doctype-system=<i>systemid</i></code></dt>
+<dd>Forces the output of a <code>DOCTYPE</code> declaration with the specified systemid.</dd>
+
+<dt><code>--doctype-public=<i>publicid</i></code></dt>
+<dd>Forces the output of a <code>DOCTYPE</code> declaration with the specified publicid.</dd>
+
+<dt><code>--version=<i>version</i></code></dt>
+<dd>Sets the version string in the XML declaration.</dd>
+
+<dt><code>--standalone=</code>[<code>yes</code>|<code>no</code>]</dt>
+<dd>Sets the standalone declaration to yes or no.</dd>
+
+<dt><code>--pyx</code></dt>
+<dd>Output is in PYX format.</dd>
+
+<dt><code>--pyxin</code></dt>
+<dd>Input is in PYXoid format (need not be well-formed).</dd>
+
+<dt><code>--nons</code></dt>
+<dd>Namespaces are suppressed.  Normally, all elements are in the XHTML 1.x
+namespace, and all attributes are in no namespace.</dd>
+
+<dt><code>--nobogons</code></dt>
+<dd>Bogons (unknown elements) are suppressed.</dd>
+
+<dt><code>--nodefaults</code></dt>
+<dd>suppress default attribute values</dd>
+
+<dt><code>--nocolons</code></dt>
+<dd>change  explicit colons in element and attribute names to underscores</dd>
+
+<dt><code>--norestart</code></dt>
+<dd>don't restart any normally restartable elements</dd>
+
+<dt><code>--ignorable</code></dt>
+<dd>output whitespace in elements with element-only content</dd>
+
+<dt><code>--emptybogons</code></dt>
+<dd>Bogons are given a content model of EMPTY rather than ANY.</dd>
+
+<dt><code>--any</code></dt>
+<dd>Bogons are given a content model of ANY rather than EMPTY (default).</dd>
+
+<dt><code>--norootbogons</code></dt>
+<dd>Don't allow bogons to be root elements; make them subordinate to the root.</dd>
+
+<dt><code>--lexical</code></dt>
+<dd>Pass through HTML comments and DOCTYPE declarations.  Has no effect
+when output is in PYX format.</dd>
+
+<dt><code>--reuse</code></dt>
+<dd>Reuse a single instance of TagSoup parser throughout.  Normally, a new one
+is instantiated for each input file.</dd>
+
+<dt><code>--nocdata</code></dt>
+<dd>Change the content models of the <code>script</code> and <code>style</code> elements
+to treat them as ordinary #PCDATA (text-only) elements, as in XHTML, rather than
+with the special CDATA content model.</dd>
+
+<dt><code>--encoding=</code><i>encoding</i></dt>
+<dd>Specify the input encoding.  The default is the Java platform default.</dd>
+
+<dt><code>--output-encoding=</code><i>encoding</i></dt>
+<dd>Specify the output encoding.  The default is the Java platform default.</dd>
+
+<dt><code>--help</code></dt>
+<dd>Print help.</dd>
+
+<dt><code>--version</code></dt>
+<dd>Print the version number.</dd>
+
+</dl>
+
+<a name="properties"></a><h3>SAX features and properties</h3>
+
+<p>TagSoup supports the following SAX features in addition to the
+standard ones:</p>
+
+<dl>
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/ignore-bogons</tt></dt>
+<dd>A value of "true" indicates that the parser will ignore
+unknown elements.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/bogons-empty</tt></dt>
+<dd>A value of "true" indicates that the parser will give unknown
+elements a content model of EMPTY; a value of "false", a
+content model of ANY.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/root-bogons</tt></dt>
+<dd>A value of "true" indicates that the parser will allow unknown
+elements to be the root of the output document.</dd>
+
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/default-attributes</tt></dt>
+<dd>A value of "true" indicates that the parser will return default
+attribute values for missing attributes that have default values.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/translate-colons</tt></dt>
+<dd>A value of "true" indicates that the parser will 
+translate colons into underscores in names.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/restart-elements</tt></dt>
+<dd>A value of "true" indicates that the parser will 
+attempt to restart the restartable elements.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/ignorable-whitespace</tt></dt>
+<dd>A value of "true" indicates that the parser will 
+transmit whitespace in element-only content via the SAX
+ignorableWhitespace callback.  Normally this is not done,
+because HTML is an SGML application and SGML suppresses
+such whitespace.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/features/cdata-elements</tt></dt>
+<dd>A value of "true" indicates that the parser will 
+process the <tt>script</tt> and <tt>style</tt> elements
+(or any elements with <tt>type='cdata'</tt> in the TSSL schema)
+as SGML CDATA elements (that is, no markup is recognized except
+the matching end-tag).</dd>
+
+</dl>
+
+<p>TagSoup supports the following SAX properties in addition to
+the standard ones:</p>
+
+<dl>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/properties/scanner</tt></dt>
+<dd>Specifies the Scanner object this parser uses.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/properties/schema</tt></dt>
+<dd>Specifies the Schema object this parser uses.</dd>
+
+<dt><tt>http://www.ccil.org/~cowan/tagsoup/properties/auto-detector</tt></dt>
+<dd>Specifies the AutoDetector (for encoding detection) this parser uses.</dd>
+
+</dl>
+ 
+<h3>More information</h3>
+<p>I gave a presentation (a nocturne, so it's not on the schedule) at
+<a href="http://www.extrememarkup.com/extreme/2004">Extreme Markup Languages 2004</a>
+about TagSoup, updated from the one
+presented in 2002 at the New York City XML SIG and at XML 2002.
+This is the main high-level documentation about how TagSoup works.
+Formats:
+<a href="tagsoup.odp">OpenDocument</a>
+<a href="tagsoup.ppt">Powerpoint</a>
+<a href="tagsoup.pdf">PDF</a>.
+
+<p>I also had people add <a href="extreme.html">"evil" HTML</a> to a large
+poster so that I could <a href="extreme.xhtml">clean it up</a>;
+View Source is probably more useful than ordinary browsing.
+The original instructions were:</p>
+
+<p align="center">SOUPE DE BALISES (BE EVIL)!</br>
+Ecritez une balise ouvrante (sans attributs)<br/> ou fermante HTML ici, s.v.p.<p/>
+
+
+<p>There is a <a href="http://groups.yahoo.com/group/tagsoup-friends">
+tagsoup-friends</a> mailing list hosted at <a href="http://groups.yahoo.com">
+Yahoo Groups</a>.  You can
+<a href="http://groups.yahoo.com/group/tagsoup-friends/join">join</a>
+via the Web, or by sending a blank email to
+<a href="mailto:tagsoup-friends-subscribe@yahoogroups.com"><i>
+tagsoup-friends-subscribe@yahoogroups.com</i></a>.
+The <a href="http://groups.yahoo.com/group/tagsoup-friends/messages">
+archives</a> are open to all.</p>
+
+<p>Online TagSoup processing for publicly accessible HTML documents
+is now <a href="http://xmlarmyknife.org/docs/xhtml/tagsoup/">available</a>
+courtesy of Leigh Dodds.</p>
