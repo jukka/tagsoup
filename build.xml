@@ -13,7 +13,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 -->
 
-<project name="tagsoup" default="dist">
+<project name="tagsoup" default="dist" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
   <!-- generic properties -->
   <property file="etc/build/build.properties"/>
@@ -42,6 +42,22 @@
   <property name="tmp" value="tmp"/>
 
 
+  <!-- define Maven coordinates -->
+  <property name="groupId" value="org.ccil.cowan.tagsoup" />
+  <property name="artifactId" value="tagsoup" />
+  <property name="version" value="${tagsoup.version}" />
+
+  <!-- define artifacts' name, which follows the convention of Maven -->
+  <property name="maven-jar" value="${dist}/lib/${artifactId}-${version}.jar" />
+  <property name="maven-javadoc-jar" value="${dist}/lib/${artifactId}-${version}-javadoc.jar" />
+  <property name="maven-sources-jar" value="${dist}/lib/${artifactId}-${version}-sources.jar" />
+
+  <!-- defined maven snapshots and staging repository id and url -->
+  <property name="maven-snapshots-repository-id" value="sonatype-nexus-snapshots" />
+  <property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots/" />
+  <property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
+  <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+
   <!-- initialize project -->
   <target name="init" description="Init project.">
     <tstamp/>
@@ -55,12 +71,23 @@
   </target>
 
   <!-- Build a distribution jar file -->
-  <target name="dist" depends="init,compile"
+  <target name="dist" depends="init,compile,docs-api"
 	  description="Build a binary distribution file.">
     <antcall target="jar-release">
       <param name="buildDir" value="build"/>
       <param name="version" value="${tagsoup.version}"/>
     </antcall>
+
+    <!-- build the javadoc artifact -->
+    <jar jarfile="${maven-javadoc-jar}">
+      <fileset dir="${docs}/api" />
+    </jar>
+
+    <!-- build the sources artifact -->
+    <jar jarfile="${maven-sources-jar}">
+      <fileset dir="${src}/java" />
+      <fileset dir="${tmp}/src" />
+    </jar>
   </target>
 
 
@@ -155,6 +182,51 @@ style="stml/stml.xslt">
       <doctitle><![CDATA[<h1>TagSoup Package Documentation</h1>]]></doctitle>
 	  <bottom><![CDATA[<em>License</em>: <strong>Apache 2.0</strong>]]></bottom>
     </javadoc>
+  </target>
+
+  <target name="deploy" depends="dist" description="deploy snapshot version to Maven snapshot repository">
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+      <arg value="-Durl=${maven-snapshots-repository-url}" />
+      <arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+      <arg value="-DpomFile=pom.xml" />
+      <arg value="-Dfile=${maven-jar}" />
+    </artifact:mvn>
+  </target>
+
+  <!-- before this, update project version (both build.xml and pom.xml) from SNAPSHOT to RELEASE -->
+  <target name="stage" depends="dist" description="deploy release version to Maven staging repository">
+    <!-- sign and deploy the main artifact -->
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+      <arg value="-Durl=${maven-staging-repository-url}" />
+      <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+      <arg value="-DpomFile=pom.xml" />
+      <arg value="-Dfile=${maven-jar}" />
+      <arg value="-Pgpg" />
+    </artifact:mvn>
+
+    <!-- sign and deploy the sources artifact -->
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+      <arg value="-Durl=${maven-staging-repository-url}" />
+      <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+      <arg value="-DpomFile=pom.xml" />
+      <arg value="-Dfile=${maven-sources-jar}" />
+      <arg value="-Dclassifier=sources" />
+      <arg value="-Pgpg" />
+    </artifact:mvn>
+
+    <!-- sign and deploy the javadoc artifact -->
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+      <arg value="-Durl=${maven-staging-repository-url}" />
+      <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+      <arg value="-DpomFile=pom.xml" />
+      <arg value="-Dfile=${maven-javadoc-jar}" />
+      <arg value="-Dclassifier=javadoc" />
+      <arg value="-Pgpg" />
+    </artifact:mvn>
   </target>
 
 </project>
