@@ -153,7 +153,7 @@ style="stml/stml.xslt">
 		use="true"
 		windowtitle="TagSoup ${tagsoup.version} API">
       <doctitle><![CDATA[<h1>TagSoup Package Documentation</h1>]]></doctitle>
-	  <bottom><![CDATA[<em>Licence</em>: <strong>Academic Free License 3.0</strong> and/or <strong>GPL 2.0</strong>]]></bottom>
+	  <bottom><![CDATA[<em>License</em>: <strong>Apache 2.0</strong>]]></bottom>
     </javadoc>
   </target>
 

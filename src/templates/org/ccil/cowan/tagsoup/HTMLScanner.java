@@ -47,6 +47,76 @@ public class HTMLScanner implements Scanner, Locator {
 		0xFFFD, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
 		0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0xFFFD, 0x017E, 0x0178};
 
+	/**
+	 * Index into the state table for [state][input character - 2].
+	 * The state table consists of 4-entry runs on the form
+	 * { current state, input character, action, next state }.
+	 * We precompute the index into the state table for all possible
+	 * { current state, input character } and store the result in
+	 * the statetableIndex array. Since only some input characters
+	 * are present in the state table, we only do the computation for
+	 * characters 0 to the highest character value in the state table.
+	 * An input character of -2 is used to cover all other characters
+	 * as -2 is guaranteed not to match any input character entry
+	 * in the state table.
+	 *
+	 * <p>When doing lookups, the input character should first be tested
+	 * to be in the range [-1 (inclusive), statetableIndexMaxChar (exclusive)].
+	 * if it isn't use -2 as the input character.
+	 * 
+	 * <p>Finally, add 2 to the input character to cover for the fact that
+	 * Java doesn't support negative array indexes. Then look up
+	 * the value in the statetableIndex. If the value is -1, then
+	 * no action or next state was found for the { state, input } that
+	 * you had. If it isn't -1, then action = statetable[value + 2] and
+	 * next state = statetable[value + 3]. That is, the value points
+	 * to the start of the answer 4-tuple in the statetable.
+	 */
+	static short[][] statetableIndex;
+	/**
+	 * The highest character value seen in the statetable.
+	 * See the doc comment for statetableIndex to see how this
+	 * is used.
+	 */
+	static int statetableIndexMaxChar;
+	static {
+		int maxState = -1;
+		int maxChar = -1;
+		for (int i = 0; i < statetable.length; i += 4) {
+			if (statetable[i] > maxState) {
+				maxState = statetable[i];
+				}
+			if (statetable[i + 1] > maxChar) {
+				maxChar = statetable[i + 1];
+				}
+			}
+		statetableIndexMaxChar = maxChar + 1;
+
+		statetableIndex = new short[maxState + 1][maxChar + 3];
+		for (int theState = 0; theState <= maxState; ++theState) {
+			for (int ch = -2; ch <= maxChar; ++ch) {
+				int hit = -1;
+				int action = 0;
+				for (int i = 0; i < statetable.length; i += 4) {
+					if (theState != statetable[i]) {
+						if (action != 0) break;
+						continue;
+						}
+					if (statetable[i+1] == 0) {
+						hit = i;
+						action = statetable[i+2];
+						}
+					else if (statetable[i+1] == ch) {
+						hit = i;
+						action = statetable[i+2];
+						break;
+						}
+					}
+				statetableIndex[theState][ch + 2] = (short) hit;
+				}
+			}
+		}
+
 	// Compensate for bug in PushbackReader that allows
 	// pushing back EOF.
 	private void unread(PushbackReader r, int c) throws IOException {
@@ -92,14 +162,11 @@ public class HTMLScanner implements Scanner, Locator {
 	public void scan(Reader r0, ScanHandler h) throws IOException, SAXException {
 		theState = S_PCDATA;
 		PushbackReader r;
-		if (r0 instanceof PushbackReader) {
-			r = (PushbackReader)r0;
-			}
-		else if (r0 instanceof BufferedReader) {
-			r = new PushbackReader(r0);
+		if (r0 instanceof BufferedReader) {
+			r = new PushbackReader(r0, 5);
 			}
 		else {
-			r = new PushbackReader(new BufferedReader(r0));
+			r = new PushbackReader(new BufferedReader(r0), 5);
 			}
 
 		int firstChar = r.read();	// Remove any leading BOM
@@ -130,62 +197,54 @@ public class HTMLScanner implements Scanner, Locator {
 			if (!(ch >= 0x20 || ch == '\n' || ch == '\t' || ch == -1)) continue;
 
 			// Search state table
+			int adjCh = (ch >= -1 && ch < statetableIndexMaxChar) ? ch : -2;
+			int statetableRow = statetableIndex[theState][adjCh + 2];
 			int action = 0;
-			for (int i = 0; i < statetable.length; i += 4) {
-				if (theState != statetable[i]) {
-					if (action != 0) break;
-					continue;
-					}
-				if (statetable[i+1] == 0) {
-					action = statetable[i+2];
-					theNextState = statetable[i+3];
-					}
-				else if (statetable[i+1] == ch) {
-					action = statetable[i+2];
-					theNextState = statetable[i+3];
-					break;
-					}
+			if (statetableRow != -1) {
+				action = statetable[statetableRow + 2];
+				theNextState = statetable[statetableRow + 3];
 				}
+
 //			System.err.println("In " + debug_statenames[theState] + " got " + nicechar(ch) + " doing " + debug_actionnames[action] + " then " + debug_statenames[theNextState]);
 			switch (action) {
 			case 0:
 				throw new Error(
-"HTMLScanner can't cope with " + Integer.toString(ch) + " in state " +
-Integer.toString(theState));
-        		case A_ADUP:
+					"HTMLScanner can't cope with " + Integer.toString(ch) + " in state " +
+					Integer.toString(theState));
+			case A_ADUP:
 				h.adup(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_ADUP_SAVE:
+			case A_ADUP_SAVE:
 				h.adup(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				save(ch, h);
 				break;
-        		case A_ADUP_STAGC:
+			case A_ADUP_STAGC:
 				h.adup(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				h.stagc(theOutputBuffer, 0, theSize);
 				break;
-        		case A_ANAME:
+			case A_ANAME:
 				h.aname(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_ANAME_ADUP:
+			case A_ANAME_ADUP:
 				h.aname(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				h.adup(theOutputBuffer, 0, theSize);
 				break;
-        		case A_ANAME_ADUP_STAGC:
+			case A_ANAME_ADUP_STAGC:
 				h.aname(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				h.adup(theOutputBuffer, 0, theSize);
 				h.stagc(theOutputBuffer, 0, theSize);
 				break;
-        		case A_AVAL:
+			case A_AVAL:
 				h.aval(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_AVAL_STAGC:
+			case A_AVAL_STAGC:
 				h.aval(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				h.stagc(theOutputBuffer, 0, theSize);
@@ -268,15 +327,15 @@ Integer.toString(theState));
 					}
 				theNextState = S_PCDATA;
 				break;
-        		case A_ETAG:
+			case A_ETAG:
 				h.etag(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_DECL:
+			case A_DECL:
 				h.decl(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_GI:
+			case A_GI:
 				h.gi(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
@@ -285,7 +344,7 @@ Integer.toString(theState));
 				theSize = 0;
 				h.stagc(theOutputBuffer, 0, theSize);
 				break;
-        		case A_LT:
+			case A_LT:
 				mark();
 				save('<', h);
 				save(ch, h);
@@ -296,7 +355,7 @@ Integer.toString(theState));
 				h.pcdata(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_PCDATA:
+			case A_PCDATA:
 				mark();
 				h.pcdata(theOutputBuffer, 0, theSize);
 				theSize = 0;
@@ -318,29 +377,29 @@ Integer.toString(theState));
 				save('-', h);
 				save(ch, h);
 				break;
-        		case A_PI:
+			case A_PI:
 				mark();
 				h.pi(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_PITARGET:
+			case A_PITARGET:
 				h.pitarget(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
-        		case A_PITARGET_PI:
+			case A_PITARGET_PI:
 				h.pitarget(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				h.pi(theOutputBuffer, 0, theSize);
 				break;
-        		case A_SAVE:
+			case A_SAVE:
 				save(ch, h);
 				break;
-        		case A_SKIP:
+			case A_SKIP:
 				break;
-        		case A_SP:
+			case A_SP:
 				save(' ', h);
 				break;
-        		case A_STAGC:
+			case A_STAGC:
 				h.stagc(theOutputBuffer, 0, theSize);
 				theSize = 0;
 				break;
@@ -355,7 +414,7 @@ Integer.toString(theState));
 				unread(r, ch);
 				theCurrentColumn--;
 				break;
-        		case A_UNSAVE_PCDATA:
+			case A_UNSAVE_PCDATA:
 				if (theSize > 0) theSize--;
 				h.pcdata(theOutputBuffer, 0, theSize);
 				theSize = 0;
@@ -396,7 +455,7 @@ Integer.toString(theState));
 			else {
 				// Grow the buffer size
 				char[] newOutputBuffer = new char[theOutputBuffer.length * 2];
-                                System.arraycopy(theOutputBuffer, 0, newOutputBuffer, 0, theSize+1);
+				System.arraycopy(theOutputBuffer, 0, newOutputBuffer, 0, theSize+1);
 				theOutputBuffer = newOutputBuffer;
 				}
 			}

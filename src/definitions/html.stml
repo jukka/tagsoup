@@ -241,6 +241,7 @@
 		<tr symbol='EOF' action='A_SKIP' newstate='S_DONE'/>
 	</state>
 	<state id='S_CDSECT2'>
+		<tr char=']' action='A_SAVE' newstate='S_CDSECT2'/>
 		<tr char='>' action='A_CDATA' newstate='S_PCDATA'/>
 		<tr symbol='default' action='A_SAVE' newstate='S_CDSECT'/>
 		<tr symbol='EOF' action='A_SKIP' newstate='S_DONE'/>
