@@ -834,7 +834,7 @@ public class Parser extends DefaultHandler implements ScanHandler, XMLReader, Le
 		String systemid = null;
 		String publicid = null;
 		String[] v = split(s);
-		if (v.length > 0 && "DOCTYPE".equals(v[0])) {
+		if (v.length > 0 && "DOCTYPE".equalsIgnoreCase(v[0])) {
 			if (theDoctypeIsPresent) return;		// one doctype only!
 			theDoctypeIsPresent = true;
 			if (v.length > 1) {

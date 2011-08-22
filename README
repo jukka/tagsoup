@@ -1,33 +1,77 @@
-                        TagSoup - Just Keep On Truckin'
+    [TagSoupLogo32.png] TagSoup - Just Keep On Truckin' [TagSoupLogo32.png]
+
+  Index
+
+     * [1]Introduction
+     * [2]Tagsoup 1.2.1 released
+     * [3]Taggle, a C++ port of TagSoup, available now
+     * [4]TagSoup 1.2 released
+     * [5]What TagSoup does
+     * [6]The TSaxon XSLT-for-HTML processor
+     * [7]Note: TagSoup in Java 1.1
+     * [8]Warning: TagSoup will not build on stock Java 5.x or 6.x!
+     * [9]TagSoup as a stand-alone program
+     * [10]SAX features and properties
+     * [11]Other TagSoups and related things
+     * [12]More information
 
   Introduction
 
    This is the home page of TagSoup, a SAX-compliant parser written in
    Java that, instead of parsing well-formed or valid XML, parses HTML as
-   it is found in the wild: [1]poor, nasty and brutish, though quite often
-   far from short. TagSoup is designed for people who have to process this
-   stuff using some semblance of a rational application design. By
-   providing a SAX interface, it allows standard XML tools to be applied
-   to even the worst HTML. TagSoup also includes a command-line processor
-   that reads HTML files and can generate either clean HTML or well-formed
-   XML that is a close approximation to XHTML.
+   it is found in the wild: [13]poor, nasty and brutish, though quite
+   often far from short. TagSoup is designed for people who have to
+   process this stuff using some semblance of a rational application
+   design. By providing a SAX interface, it allows standard XML tools to
+   be applied to even the worst HTML. TagSoup also includes a command-line
+   processor that reads HTML files and can generate either clean HTML or
+   well-formed XML that is a close approximation to XHTML.
 
    This is also the README file packaged with TagSoup.
 
    TagSoup is free and Open Source software. As of version 1.2, it is
-   licensed under the [2]Apache License, Version 2.0, which allows
+   licensed under the [14]Apache License, Version 2.0, which allows
    proprietary re-use as well as use with GPL 3.0 or GPL 2.0-or-later
    projects. (If anyone needs a GPL 2.0 license for a GPL 2.0-only
    project, feel free to ask.)
 
-  Warning: TagSoup will not build on stock Java 5.x or 6.x!
+   The TagSoup logo is courtesy Ian Leslie.
 
-   Due to a bug in the versions of Xalan shipped with Java 5.x and 6.x,
-   TagSoup will not build out of the box. You need to retrieve [3]Saxon
-   6.5.5, which does not have the bug. Unpack the zipfile in an empty
-   directory and copy the saxon.jar and saxon-xml-apis.jar files to
-   $ANT_HOME/lib. The Ant build process for TagSoup will then notice that
-   Saxon is available and use it instead.
+  TagSoup 1.2.1 released
+
+   TagSoup 1.2.1 is a much-delayed bug fix release. The following bugs
+   have hopefully been repaired:
+     * DOCTYPE is now recognized even in lower case.
+     * We make sure to buffer the reader, eliminating a long-standing bug
+       that would crash on certain inputs, such as & followed by CR+LF.
+     * The HTML scanner's table is precompiled at run time for efficiency,
+       causing a 4x speedup on large input documents.
+     * ]] within a CDATA section no longer causes input to be discarded.
+     * Remove bogus newline after printing children of the root element.
+     * Allow the noscript element anywhere, the same as the script
+       element.
+     * Updated to the 2011 edition of the W3C character entity list.
+
+   [15]Download the TagSoup 1.2.1 jar file here. It's about 89K long.
+   [16]Download the full TagSoup 1.2.1 source here. If you don't have zip,
+   you can use jar to unpack it.
+   [17]Download the current CHANGES file here.
+
+  Taggle, a TagSoup in C++, available now
+
+   A company called [18]JezUK has released [19]Taggle, which is a straight
+   port of TagSoup 1.2 to C++. It's a part of [20]Arabica, a C++ XML
+   toolkit providing SAX, DOM, XPath, and partial XSLT. I have no
+   connection with JezUK (except apparently as source of inspiration).
+
+   The author says the code is alpha-quality now, so he'd appreciate lots
+   of testers to shake out bugs. C++ users, go to it! Having a C++ port
+   will be a real enhancement for TagSoup.
+
+   The code is currently in public Subversion: you can fetch it with
+svn co svn://jezuk.dnsalias.net/jezuk/arabica/branches/tagsoup-port
+
+   .
 
   TagSoup 1.2 released
 
@@ -60,7 +104,7 @@
             the default root element (the html element for HTML).
      * The TagSoup core now supports character entities with values above
        U+FFFF. As a consequence, the HTML schema now supports all 2,210
-       standard character entities from the [4]2007-12-14 draft of XML
+       standard character entities from the [21]2007-12-14 draft of XML
        Entity Definitions for Characters, except the 94 which require more
        than one Unicode character to represent.
      * The SAX events startPrefixMapping and endPrefixMapping are now
@@ -82,27 +126,10 @@
        in text rather than being transformed into extremely bogus
        start-tags.
 
-   [5]Download the TagSoup 1.2 jar file here. It's about 87K long.
-   [6]Download the full TagSoup 1.2 source here. If you don't have zip,
-   you can use jar to unpack it.
-   [7]Download the current CHANGES file here.
-
-  TagSoup 1.1 released
-
-   TagSoup 1.1 adds Tatu Saloranta's JAXP support for TagSoup. To use
-   TagSoup within the JAXP framework (which is not something I necessarily
-   recommend, but it is part of the Java XML platform), you can create a
-   SAXParser by calling
-   org.ccil.cowan.tagsoup.jaxp.SAXParserImpl.newInstance(). You can also
-   set the system property javax.xml.parsers.SAXParserFactory to
-   org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl, but be aware that doing
-   this will cause all JAXP-based XML parsing to go through TagSoup, which
-   is a Bad Thing if your application also reads XML documents.
-
   What TagSoup does
 
    TagSoup is designed as a parser, not a whole application; it isn't
-   intended to permanently clean up bad HTML, as [8]HTML Tidy does, only
+   intended to permanently clean up bad HTML, as [22]HTML Tidy does, only
    to parse it on the fly. Therefore, it does not convert presentation
    HTML to CSS or anything similar. It does guarantee well-structured
    results: tags will wind up properly nested, default attributes will
@@ -110,7 +137,7 @@
 
    The semantics of TagSoup are as far as practical those of actual HTML
    browsers. In particular, never, never will it throw any sort of syntax
-   error: the TagSoup motto is [9]"Just Keep On Truckin'". But there's
+   error: the TagSoup motto is [23]"Just Keep On Truckin'". But there's
    much, much more. For example, if the first tag is LI, it will supply
    the application with enclosing HTML, BODY, and UL tags. Why UL? Because
    that's what browsers assume in this situation. For the same reason,
@@ -122,16 +149,23 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
 
    By intention, TagSoup is small and fast. It does not depend on the
    existence of any framework other than SAX, and should be able to work
-   with any framework that can accept SAX parsers. In particular, [10]XOM
+   with any framework that can accept SAX parsers. In particular, [24]XOM
    is known to work.
 
    You can replace the low-level HTML scanner with one based on Sean
-   McGrath's [11]PYX format (very close to James Clark's ESIS format). You
+   McGrath's [25]PYX format (very close to James Clark's ESIS format). You
    can also supply an AutoDetector that peeks at the incoming byte stream
    and guesses a character encoding for it. Otherwise, the platform
    default is used. If you need an autodetector of character sets,
-   consider trying to adapt the [12]Mozilla one; if you succeed, let me
+   consider trying to adapt the [26]Mozilla one; if you succeed, let me
    know.
+
+  The TSaxon XSLT-for-HTML processor
+
+   [27]I am also distributing [28]TSaxon, a repackaging of version 6.5.5
+   of Michael Kay's Saxon XSLT version 1.0 implementation that includes
+   TagSoup. TSaxon is a drop-in replacement for Saxon, and can be used to
+   process either HTML or XML documents with XSLT stylesheets.
 
   Note: TagSoup in Java 1.1
 
@@ -139,17 +173,23 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
    HashMap with Hashtable and recompile, TagSoup will work fine in Java
    1.1 VMs. Thanks to Thorbjørn Vinne for this discovery.
 
-  The TSaxon XSLT-for-HTML processor
+  Warning: TagSoup will not build on stock Java 5.x or 6.x!
 
-   [13]I am also distributing [14]TSaxon, a repackaging of version 6.5.5
-   of Michael Kay's Saxon XSLT version 1.0 implementation that includes
-   TagSoup. TSaxon is a drop-in replacement for Saxon, and can be used to
-   process either HTML or XML documents with XSLT stylesheets.
+   Due to a bug in the versions of Xalan shipped with Java 5.x and 6.x,
+   TagSoup will not build out of the box. You need to retrieve [29]Saxon
+   6.5.5, which does not have the bug. Unpack the zipfile in an empty
+   directory and copy the saxon.jar and saxon-xml-apis.jar files to
+   $ANT_HOME/lib. The Ant build process for TagSoup will then notice that
+   Saxon is available and use it instead.
+
+   In addition, if you are building on a Debian-derived distro, you will
+   need to install not only the ant package but the ant-optional package
+   as well.
 
   TagSoup as a stand-alone program
 
    It is possible to run TagSoup as a program by saying java -jar
-   tagsoup-1.0.1 [option ...] [file ...]. Files mentioned on the command
+   tagsoup-1.2.1 [option ...] [file ...]. Files mentioned on the command
    line will be parsed individually. If no files are specified, the
    standard input is read.
 
@@ -197,17 +237,17 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
           Bogons (unknown elements) are suppressed.
 
    --nodefaults
-          suppress default attribute values
+          Default attribute values are suppressed.
 
    --nocolons
-          change explicit colons in element and attribute names to
-          underscores
+          Explicit colons in element and attribute names are changed to
+          underscores.
 
    --norestart
-          don't restart any normally restartable elements
+          don't restart any normally restartable elements.
 
    --ignorable
-          output whitespace in elements with element-only content
+          Output whitespace in elements with element-only content.
 
    --emptybogons
           Bogons are given a content model of EMPTY rather than ANY.
@@ -217,8 +257,8 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
           (default).
 
    --norootbogons
-          Don't allow bogons to be root elements; make them subordinate to
-          the root.
+          Bogons are not allowed to be root elements; make them
+          subordinate to the root.
 
    --lexical
           Pass through HTML comments and DOCTYPE declarations. Has no
@@ -249,8 +289,8 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
 
   SAX features and properties
 
-   TagSoup supports the following SAX features in addition to the standard
-   ones:
+   TagSoup supports the following SAX features in addition to [30]the
+   standard ones:
 
    http://www.ccil.org/~cowan/tagsoup/features/ignore-bogons
           A value of "true" indicates that the parser will ignore unknown
@@ -290,7 +330,7 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
           the TSSL schema) as SGML CDATA elements (that is, no markup is
           recognized except the matching end-tag).
 
-   TagSoup supports the following SAX properties in addition to the
+   TagSoup supports the following SAX properties in addition to [31]the
    standard ones:
 
    http://www.ccil.org/~cowan/tagsoup/properties/scanner
@@ -303,55 +343,103 @@ This is <b>bold, <i>bold italic, </i></b><i>italic, </i>normal text.
           Specifies the AutoDetector (for encoding detection) this parser
           uses.
 
+  Other TagSoups and related things
+
+   [32]TagSoup is written in [33]the world's finest imperative programming
+   language, as opposed to my TagSoup, which is written in [34]perhaps the
+   world's most widely used imperative programming language. As far as I
+   can make out, TagSoup only lexes its input, and does not attempt to
+   balance tags in the style of my TagSoup.
+
+   [35]BeautifulSoup is closer to my TagSoup, but is written in Python and
+   returns a parse tree. I believe its heuristics are hard-coded for HTML.
+   There is a port to Ruby called [36]RubyfulSoup.
+
+   There are a variety of other HTML SAX parsers written in Java, notably
+   [37]NekoHTML, [38]JTidy (a port of the C library and tool [39]HTML
+   Tidy), and [40]HTML Parser. All have their good and bad points: the
+   general view around the Web seems to be that TagSoup is the slowest,
+   but also the most robust and reliable.
+
+   Finally, there is a full port of my TagSoup to C++, but unfortunately
+   it is currently trapped inside IBM. The process to release it as Open
+   Source is under way, and I hope to feature it here some time soon.
+
   More information
 
    I gave a presentation (a nocturne, so it's not on the schedule) at
-   [15]Extreme Markup Languages 2004 about TagSoup, updated from the one
+   [41]Extreme Markup Languages 2004 about TagSoup, updated from the one
    presented in 2002 at the New York City XML SIG and at XML 2002. This is
    the main high-level documentation about how TagSoup works. Formats:
-   [16]OpenDocument [17]Powerpoint [18]PDF.
+   [42]OpenDocument [43]Powerpoint [44]PDF.
 
-   I also had people add [19]"evil" HTML to a large poster so that I could
-   [20]clean it up; View Source is probably more useful than ordinary
+   I also had people add [45]"evil" HTML to a large poster so that I could
+   [46]clean it up; View Source is probably more useful than ordinary
    browsing. The original instructions were:
 
                          SOUPE DE BALISES (BE EVIL)!
    Ecritez une balise ouvrante (sans attributs)
    ou fermante HTML ici, s.v.p.
 
-   There is a [21]tagsoup-friends mailing list hosted at [22]Yahoo Groups.
-   You can [23]join via the Web, or by sending a blank email to
-   [24]tagsoup-friends-subscribe@yahoogroups.com. The [25]archives are
+   There is a [47]tagsoup-friends mailing list hosted at [48]Yahoo Groups.
+   You can [49]join via the Web, or by sending a blank email to
+   [50]tagsoup-friends-subscribe@yahoogroups.com. The [51]archives are
    open to all.
 
    Online TagSoup processing for publicly accessible HTML documents is now
-   [26]available courtesy of Leigh Dodds.
+   [52]available courtesy of Leigh Dodds.
 
 References
 
-   1. http://oregonstate.edu/instruct/phl302/texts/hobbes/leviathan-c.html
-   2. http://opensource.org/licenses/apache2.0.php
-   3. http://prdownloads.sourceforge.net/saxon/saxon6-5-5.zip
-   4. http://www.w3.org/TR/2007/WD-xml-entity-names-20071214
-   5. http://home.ccil.org/~cowan/XML/tagsoup/tagsoup-1.2.jar
-   6. http://home.ccil.org/~cowan/XML/tagsoup/tagsoup-1.2-src.zip
-   7. http://home.ccil.org/~cowan/XML/tagsoup/CHANGES
-   8. http://tidy.sf.net/
-   9. http://www.crumbmuseum.com/truckin.html
-  10. http://www.cafeconleche.org/XOM
-  11. http://gnosis.cx/publish/programming/xml_matters_17.html
-  12. http://jchardet.sourceforge.net/
-  13. http://www.ccil.org/~cowan
-  14. http://home.ccil.org/~cowan/XML/tagsoup/tsaxon
-  15. http://www.extrememarkup.com/extreme/2004
-  16. http://home.ccil.org/~cowan/XML/tagsoup/tagsoup.odp
-  17. http://home.ccil.org/~cowan/XML/tagsoup/tagsoup.ppt
-  18. http://home.ccil.org/~cowan/XML/tagsoup/tagsoup.pdf
-  19. http://home.ccil.org/~cowan/XML/tagsoup/extreme.html
-  20. http://home.ccil.org/~cowan/XML/tagsoup/extreme.xhtml
-  21. http://groups.yahoo.com/group/tagsoup-friends
-  22. http://groups.yahoo.com/
-  23. http://groups.yahoo.com/group/tagsoup-friends/join
-  24. mailto:tagsoup-friends-subscribe@yahoogroups.com
-  25. http://groups.yahoo.com/group/tagsoup-friends/messages
-  26. http://xmlarmyknife.org/docs/xhtml/tagsoup/
+   1. file://localhost/home/cowan/tagsoup/trunk/index.html#intro
+   2. file://localhost/home/cowan/tagsoup/trunk/index.html#1.2.1
+   3. file://localhost/home/cowan/tagsoup/trunk/index.html#taggle
+   4. file://localhost/home/cowan/tagsoup/trunk/index.html#1.2
+   5. file://localhost/home/cowan/tagsoup/trunk/index.html#what
+   6. file://localhost/home/cowan/tagsoup/trunk/index.html#tsaxon
+   7. file://localhost/home/cowan/tagsoup/trunk/index.html#java1.1
+   8. file://localhost/home/cowan/tagsoup/trunk/index.html#warning
+   9. file://localhost/home/cowan/tagsoup/trunk/index.html#program
+  10. file://localhost/home/cowan/tagsoup/trunk/index.html#properties
+  11. file://localhost/home/cowan/tagsoup/trunk/index.html#other
+  12. file://localhost/home/cowan/tagsoup/trunk/index.html#more
+  13. http://oregonstate.edu/instruct/phl302/texts/hobbes/leviathan-c.html
+  14. http://opensource.org/licenses/apache2.0.php
+  15. file://localhost/home/cowan/tagsoup/trunk/tagsoup-1.2.1.jar
+  16. file://localhost/home/cowan/tagsoup/trunk/tagsoup-1.2.1-src.zip
+  17. file://localhost/home/cowan/tagsoup/trunk/CHANGES
+  18. http://www.jezuk.co.uk/
+  19. http://www.jezuk.co.uk/arabica/log?id=3591
+  20. http://www.jezuk.co.uk/arabica
+  21. http://www.w3.org/TR/2007/WD-xml-entity-names-20071214
+  22. http://tidy.sf.net/
+  23. http://www.crumbmuseum.com/truckin.html
+  24. http://www.cafeconleche.org/XOM
+  25. http://gnosis.cx/publish/programming/xml_matters_17.html
+  26. http://jchardet.sourceforge.net/
+  27. http://www.ccil.org/~cowan
+  28. file://localhost/home/cowan/tagsoup/trunk/tsaxon
+  29. http://prdownloads.sourceforge.net/saxon/saxon6-5-5.zip
+  30. http://www.saxproject.org/apidoc/org/xml/sax/package-summary.html
+  31. http://www.saxproject.org/apidoc/org/xml/sax/package-summary.html
+  32. http://www-users.cs.york.ac.uk/~ndm/tagsoup/
+  33. http://www.haskell.org/
+  34. http://java.sun.com/
+  35. http://www.crummy.com/software/BeautifulSoup
+  36. http://www.crummy.com/software/RubyfulSoup/
+  37. http://nekohtml.sourceforge.net/
+  38. http://jtidy.sourceforge.net/
+  39. http://tidy.sourceforge.net/
+  40. http://htmlparser.sourceforge.net/
+  41. http://www.extrememarkup.com/extreme/2004
+  42. file://localhost/home/cowan/tagsoup/trunk/tagsoup.odp
+  43. file://localhost/home/cowan/tagsoup/trunk/tagsoup.ppt
+  44. file://localhost/home/cowan/tagsoup/trunk/tagsoup.pdf
+  45. file://localhost/home/cowan/tagsoup/trunk/extreme.html
+  46. file://localhost/home/cowan/tagsoup/trunk/extreme.xhtml
+  47. http://groups.yahoo.com/group/tagsoup-friends
+  48. http://groups.yahoo.com/
+  49. http://groups.yahoo.com/group/tagsoup-friends/join
+  50. mailto:tagsoup-friends-subscribe@yahoogroups.com
+  51. http://groups.yahoo.com/group/tagsoup-friends/messages
+  52. http://xmlarmyknife.org/docs/xhtml/tagsoup/

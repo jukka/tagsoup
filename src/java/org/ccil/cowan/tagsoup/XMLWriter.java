@@ -629,9 +629,6 @@ public class XMLWriter extends XMLFilterImpl implements LexicalHandler
                 writeName(uri, localName, qName, true);
                 write('>');
             }
-        if (elementLevel == 1) {
-            write('\n');
-        }
         cdataElement = false;
         super.endElement(uri, localName, qName);
         nsSupport.popContext();
