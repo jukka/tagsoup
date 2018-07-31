@@ -2764,8 +2764,9 @@
         <memberOf group='M_HEAD'/>
         <memberOf group='M_INLINE'/>
       </element>
-      <element name='title' type='string'>
+      <element name='title' type='cdata'>
         <memberOf group='M_HEAD'/>
+        <memberOf group='M_INLINE'/>
       </element>
       <element name='bgsound' type='empty'>
         <memberOf group='M_HEAD'/>
