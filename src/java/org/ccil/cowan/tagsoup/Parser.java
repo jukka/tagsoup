@@ -875,9 +875,9 @@ public class Parser extends DefaultHandler implements ScanHandler, XMLReader, Le
 		if (in == null) return in;
 		int length = in.length();
 		if (length == 0) return in;
-		if (s == '"') return in;
 		char s = in.charAt(0);
 		char e = in.charAt(length - 1);
+		if (length == 1 && s == '"') return in;
 		if (s == e && (s == '\'' || s == '"')) {
 			in = in.substring(1, in.length() - 1);
 			}
